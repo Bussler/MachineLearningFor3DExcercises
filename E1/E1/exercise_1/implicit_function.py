@@ -71,6 +71,6 @@ def signed_distance_atom(x, y, z):
     for i in range(0, len(x)):
         minVal[i] = concatDistances[minIndices[i], i]
 
-    return minVal
-    #return np.minimum(np.minimum(distProton, distElectron), distOrbit) # TODO correct? -> Absolute minimum!
+    #return minVal
+    return np.minimum(np.minimum(distProton, distElectron), distOrbit) # TODO correct? -> Absolute minimum?
     # ###############

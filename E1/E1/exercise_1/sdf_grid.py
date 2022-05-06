@@ -16,10 +16,15 @@ def sdf_grid(sdf_function, resolution):
     # TODO: Implement
     array = np.zeros((resolution, resolution, resolution))
 
+    factor = 1 / resolution
+
     for i in range(0,resolution):
         for j in range(0,resolution):
             for k in range(0,resolution):
-                array[i,j,k] = sdf_function(np.array([i]),np.array([j]),np.array([k]))
+                x = 0.5 - (i*factor)
+                y = 0.5 - (j*factor)
+                z = 0.5 - (k*factor)
+                array[i,j,k] = sdf_function(np.array([x]),np.array([y]),np.array([z]))
 
     return array
     # ###############
