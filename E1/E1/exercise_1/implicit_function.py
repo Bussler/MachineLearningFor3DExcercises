@@ -64,13 +64,15 @@ def signed_distance_atom(x, y, z):
     distElectron = signed_distance_sphere(x, y, z, electron_radius, electron_center[0], electron_center[1], electron_center[2])
     distOrbit = signed_distance_torus(x, y, z, orbit_radius, orbit_thickness, proton_center[0], proton_center[1], proton_center[2])
 
-    concatDistances = np.concatenate((distProton, distElectron, distOrbit)).reshape(3, len(x))
-    minIndices = np.argmin(np.abs(concatDistances), axis = 0)
+    #concatDistances = np.concatenate((distProton, distElectron, distOrbit)).reshape(3, len(x))
+    #minIndices = np.argmin(np.abs(concatDistances), axis = 0)
 
-    minVal = np.zeros(len(x))
-    for i in range(0, len(x)):
-        minVal[i] = concatDistances[minIndices[i], i]
+    #minVal = np.zeros(len(x))
+    #for i in range(0, len(x)):
+    #    minVal[i] = concatDistances[minIndices[i], i]
 
     #return minVal
-    return np.minimum(np.minimum(distProton, distElectron), distOrbit) # TODO correct? -> Absolute minimum?
+    #return np.minimum(np.minimum(distProton, distOrbit), distElectron) # TODO correct? -> Absolute minimum?
+    concatDistances = np.array([distProton, distOrbit, distElectron])
+    return np.amin(concatDistances, axis=0)
     # ###############
