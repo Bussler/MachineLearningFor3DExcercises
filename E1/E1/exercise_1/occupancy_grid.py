@@ -22,9 +22,8 @@ def occupancy_grid(sdf_function, resolution):
             for k in range(0,resolution):
 
                 sdfValue = sdf_function(np.array([i]),np.array([j]),np.array([k]))
-                if sdfValue > 0:
-                    array[i,j,k] = 0
-                else:
+                if sdfValue < 0:
                     array[i,j,k] = 1
 
+    return array
     # ###############
