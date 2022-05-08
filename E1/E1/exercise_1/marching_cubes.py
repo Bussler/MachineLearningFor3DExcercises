@@ -150,8 +150,21 @@ def compute_cube_index(cube: np.array, isolevel=0.) -> int:
 
     # ###############
     # TODO: Implement
-    raise NotImplementedError
+    
+    index = np.uint8(0)
+    for i in range(0, len(cube)):
+        if(cube[i] < isolevel):
+            index |= np.uint8(1) << i
+
+    return index
+
     # ###############
+
+
+
+edge_table = [[0,0,0, 1,0,0], [1,0,0, 1,1,0], [1,1,0, 0,1,0], [0,1,0, 0,0,0], [0,0,1, 1,0,1],
+              [1,0,1, 1,1,1], [1,1,1, 0,1,1], [0,1,1, 0,0,1], [0,0,0, 0,0,1], [1,0,0, 1,0,1],
+              [1,1,0, 1,1,1], [0,1,0, 0,1,1]]
 
 
 def marching_cubes(sdf: np.array, smooth: bool = False) -> tuple:
@@ -167,7 +180,38 @@ def marching_cubes(sdf: np.array, smooth: bool = False) -> tuple:
 
     # ###############
     # TODO: Implement
-    raise NotImplementedError
+    
+    vertices = np.array([])
+    faces = np.array([])
+    vertexCounter = 0
+
+    # cube index
+    for i in range(0, len(sdf)-1):
+        for j in range(0, len(sdf)-1):
+            for k in range(0, len(sdf)-1):
+                cube = np.array([sdf[i,j,k], sdf[i+1,j,k], sdf[i+1,j+1,k], sdf[i,j+1,k],\
+                     sdf[i,j,k+1], sdf[i+1,j,k+1], sdf[i+1,j+1,k+1], sdf[i,j+1,k+1]])
+                
+                index = compute_cube_index(cube)
+                triangleLookup = triangle_table[index]
+
+                for v in range(0, len(triangleLookup)-3, 3):
+                    # 3, 8, 0
+                    if(triangleLookup[v] == -1):
+                        break
+                    for w in range(0,3):
+                        offset1 = edge_table[triangleLookup[v+w]]
+
+                        point11 = np.array([i, j, k]) + offset1[:3]
+                        point12 = np.array([i, j, k]) + offset1[3:6]
+
+                        trianglePoint = vertex_interpolation(point11, point12, sdf[point11[0], point11[1], point11[2]], sdf[point12[0], point12[1], point12[2]], smooth = smooth)
+                        vertices = np.append(vertices, trianglePoint)
+                    faces = np.append(faces, np.array([vertexCounter, vertexCounter+1, vertexCounter+2])) # TODO maybe start with 0?
+                    vertexCounter += 3
+    vertices.reshape(vertexCounter, 3)
+    faces.reshape(int(vertexCounter/3), 3)
+    return vertices, faces
     # ###############
 
 
@@ -187,5 +231,8 @@ def vertex_interpolation(p_1, p_2, v_1, v_2, isovalue=0., smooth=False):
     else:
         # ###############
         # TODO: Implement
-        raise NotImplementedError
+        
+        t = (0 - v_1) / (v_2 - v_1)
+        return (1-t)*p_1 + t*p_2
+
         # ###############
