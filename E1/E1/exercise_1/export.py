@@ -1,5 +1,5 @@
 """Export to disk"""
-
+import numpy as np
 
 def export_mesh_to_obj(path, vertices, faces):
     """
@@ -15,7 +15,14 @@ def export_mesh_to_obj(path, vertices, faces):
 
     # ###############
     # TODO: Implement
-    raise NotImplementedError
+    file = open(path, "w")
+    
+    for v in vertices:
+        file.write("\nv "+ str(v[0]) + " " + str(v[1]) + " " + str(v[2]))
+    for f in faces:
+        file.write("\nf "+ str(f[0]+1) + " " + str(f[1]+1) + " " + str(f[2]+1))
+
+    file.close()
     # ###############
 
 

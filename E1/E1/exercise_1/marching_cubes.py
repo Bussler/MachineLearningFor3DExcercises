@@ -209,8 +209,8 @@ def marching_cubes(sdf: np.array, smooth: bool = False) -> tuple:
                         vertices = np.append(vertices, trianglePoint)
                     faces = np.append(faces, np.array([vertexCounter, vertexCounter+1, vertexCounter+2])) # TODO maybe start with 0?
                     vertexCounter += 3
-    vertices.reshape(vertexCounter, 3)
-    faces.reshape(int(vertexCounter/3), 3)
+    vertices = vertices.reshape(vertexCounter, 3)
+    faces = faces.reshape(int(vertexCounter/3), 3)
     return vertices, faces
     # ###############
 
