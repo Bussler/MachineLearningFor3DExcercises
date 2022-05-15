@@ -181,8 +181,8 @@ def marching_cubes(sdf: np.array, smooth: bool = False) -> tuple:
     # ###############
     # TODO: Implement
     
-    vertices = np.array([])
-    faces = np.array([])
+    vertices = np.array([], dtype=float)
+    faces = np.array([], dtype=int)
     vertexCounter = 0
 
     # cube index
@@ -232,7 +232,7 @@ def vertex_interpolation(p_1, p_2, v_1, v_2, isovalue=0., smooth=False):
         # ###############
         # TODO: Implement
         
-        t = (0 - v_1) / (v_2 - v_1)
+        t = (isovalue - v_1) / (v_2 - v_1)
         return (1-t)*p_1 + t*p_2
 
         # ###############

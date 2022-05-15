@@ -12,19 +12,23 @@ def sdf_grid(sdf_function, resolution):
     :return: An SDF grid of specified resolution (i.e. an array of dim (resolution, resolution, resolution) with positive values outside the shape and negative values inside.
     """
 
-    # ###############
-    # TODO: Implement
     array = np.zeros((resolution, resolution, resolution))
-
+    x = np.empty(resolution* resolution* resolution)
+    y = np.empty(resolution* resolution* resolution)
+    z = np.empty(resolution* resolution* resolution)
     factor = 1 / resolution
+
+    counter = 0
 
     for i in range(0,resolution):
         for j in range(0,resolution):
             for k in range(0,resolution):
-                x = 0.5 - (i*factor)
-                y = 0.5 - (j*factor)
-                z = 0.5 - (k*factor)
-                array[i,j,k] = sdf_function(np.array([x]),np.array([y]),np.array([z]))
+                x[counter] = (i*factor) - 0.5
+                y[counter] = (j*factor) - 0.5
+                z[counter] = (k*factor) - 0.5
+                counter += 1
+
+    sdfValues = sdf_function(x, y, z)
+    array = sdfValues.reshape((resolution, resolution, resolution))
 
     return array
-    # ###############

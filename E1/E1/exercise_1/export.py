@@ -34,7 +34,9 @@ def export_pointcloud_to_obj(path, pointcloud):
     :return: None
     """
 
-    # ###############
-    # TODO: Implement
-    raise NotImplementedError
-    # ###############
+    file = open(path, "w")
+    
+    for p in pointcloud:
+        file.write("\nv "+ str(p[0]) + " " + str(p[1]) + " " + str(p[2]))
+
+    file.close()

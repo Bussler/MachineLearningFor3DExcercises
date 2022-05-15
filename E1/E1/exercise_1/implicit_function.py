@@ -15,12 +15,10 @@ def signed_distance_sphere(x, y, z, r, x_0, y_0, z_0):
     :param z_0: z coordinate of the center of the sphere
     :return: signed distance from the surface of the sphere
     """
-    # ###############
-    # TODO: Implement
-    helper = np.power(x, 2) + np.power(y, 2) + np.power(z, 2)
+    helper = np.power(x-x_0, 2) + np.power(y-y_0, 2) + np.power(z-z_0, 2)
     helper = np.sqrt(helper)
     return helper - r
-    # ###############
+
 
 
 def signed_distance_torus(x, y, z, R, r, x_0, y_0, z_0):
@@ -36,11 +34,8 @@ def signed_distance_torus(x, y, z, R, r, x_0, y_0, z_0):
     :param z_0: z coordinate of the center of the torus
     :return: signed distance from the surface of the torus
     """
-    # ###############
-    # TODO: Implement
-    a = np.sqrt(np.power(x, 2) + np.power(z, 2)) - R # TODO use helper again for rounding?
-    return np.sqrt(np.power(a, 2) + np.power(y, 2)) - r
-    # ###############
+    a = np.sqrt(np.power(x-x_0, 2) + np.power(z-z_0, 2)) - R 
+    return np.sqrt(np.power(a, 2) + np.power(y-y_0, 2)) - r
 
 
 def signed_distance_atom(x, y, z):
@@ -57,22 +52,10 @@ def signed_distance_atom(x, y, z):
     orbit_thickness = 0.01  # The minor radius of the orbit torus
     electron_center = (orbit_radius, 0, 0)
     electron_radius = 0.05
-    # ###############
-    # TODO: Implement
 
     distProton = signed_distance_sphere(x,y,z, proton_radius, proton_center[0], proton_center[1], proton_center[2])
     distElectron = signed_distance_sphere(x, y, z, electron_radius, electron_center[0], electron_center[1], electron_center[2])
     distOrbit = signed_distance_torus(x, y, z, orbit_radius, orbit_thickness, proton_center[0], proton_center[1], proton_center[2])
 
-    #concatDistances = np.concatenate((distProton, distElectron, distOrbit)).reshape(3, len(x))
-    #minIndices = np.argmin(np.abs(concatDistances), axis = 0)
-
-    #minVal = np.zeros(len(x))
-    #for i in range(0, len(x)):
-    #    minVal[i] = concatDistances[minIndices[i], i]
-
-    #return minVal
-    #return np.minimum(np.minimum(distProton, distOrbit), distElectron) # TODO correct? -> Absolute minimum?
     concatDistances = np.array([distProton, distOrbit, distElectron])
-    return np.amin(concatDistances, axis=0)
-    # ###############
+    return np.min(concatDistances, axis=0)
