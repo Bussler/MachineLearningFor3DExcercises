@@ -181,8 +181,8 @@ def marching_cubes(sdf: np.array, smooth: bool = False) -> tuple:
     # ###############
     # TODO: Implement
     
-    vertices = np.array([], dtype=float)
-    faces = np.array([], dtype=int)
+    vertices = np.empty((len(sdf)*len(sdf)*len(sdf)*3*5,3), dtype=float)
+    faces = np.empty((len(sdf)*len(sdf)*len(sdf)*5,3), dtype=int)
     vertexCounter = 0
 
     # cube index
@@ -193,24 +193,23 @@ def marching_cubes(sdf: np.array, smooth: bool = False) -> tuple:
                      sdf[i,j,k+1], sdf[i+1,j,k+1], sdf[i+1,j+1,k+1], sdf[i,j+1,k+1]])
                 
                 index = compute_cube_index(cube)
-                triangleLookup = triangle_table[index]
+                triangleLookup = triangle_table[index] # get possible intersections
 
                 for v in range(0, len(triangleLookup)-3, 3):
-                    # 3, 8, 0
+                    # calculate surrounding edge points to interpolate position of triangle vertex
                     if(triangleLookup[v] == -1):
                         break
                     for w in range(0,3):
-                        offset1 = edge_table[triangleLookup[v+w]]
+                        offset1 = edge_table[triangleLookup[v+w]] # get offsets to cube point indices needed to calculate edge positions for interpolations
 
                         point11 = np.array([i, j, k]) + offset1[:3]
                         point12 = np.array([i, j, k]) + offset1[3:6]
 
                         trianglePoint = vertex_interpolation(point11, point12, sdf[point11[0], point11[1], point11[2]], sdf[point12[0], point12[1], point12[2]], smooth = smooth)
-                        vertices = np.append(vertices, trianglePoint)
-                    faces = np.append(faces, np.array([vertexCounter, vertexCounter+1, vertexCounter+2])) # TODO maybe start with 0?
-                    vertexCounter += 3
-    vertices = vertices.reshape(vertexCounter, 3)
-    faces = faces.reshape(int(vertexCounter/3), 3)
+                        vertices[vertexCounter] = trianglePoint
+                        vertexCounter += 1
+                    faces[vertexCounter-3] = np.array([vertexCounter-3, vertexCounter-2, vertexCounter-1])
+    vertices = np.resize(vertices, (vertexCounter, 3)) # cull not needed space
     return vertices, faces
     # ###############
 
