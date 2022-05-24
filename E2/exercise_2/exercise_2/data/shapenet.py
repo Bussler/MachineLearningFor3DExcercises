@@ -83,7 +83,7 @@ class ShapeNetPoints(torch.utils.data.Dataset):
     classes = sorted(class_name_mapping.keys())
 
     def __init__(self, split):
-        # TODO Read sample IDs from the correct split file and store in self.items
+        # T Read sample IDs from the correct split file and store in self.items
         super().__init__()
         assert split in ['train', 'val', 'overfit']
 
@@ -91,7 +91,7 @@ class ShapeNetPoints(torch.utils.data.Dataset):
         pass
 
     def __getitem__(self, index):
-        # TODO Get item associated with index, get class, load points with ShapeNetPoints.get_point_cloud
+        # T Get item associated with index, get class, load points with ShapeNetPoints.get_point_cloud
         shapenet_id = self.items[index]
         category_id, shape_id = shapenet_id.split('/')
 
@@ -110,7 +110,7 @@ class ShapeNetPoints(torch.utils.data.Dataset):
         return len(self.items)
 
     @staticmethod
-    def move_batch_to_device(batch, device): # TODO use this!
+    def move_batch_to_device(batch, device): # BigM: TODO use this in training!
         """
         Utility method for moving all elements of the batch to a device
         :return: None, modifies batch inplace
