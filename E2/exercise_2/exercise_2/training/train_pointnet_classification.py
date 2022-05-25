@@ -8,16 +8,74 @@ from exercise_2.model.pointnet import PointNetClassification
 
 def train(model, trainloader, valloader, device, config):
 
-    # TODO Declare loss and move to specified device
-    loss_criterion = None
+    # T Declare loss and move to specified device
+    loss_criterion = torch.nn.CrossEntropyLoss().to(device) # TODO Big M: use other loss criterion?
 
-    # TODO Declare optimizer
-    optimizer = None
+    # T Declare optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
 
     # set model to train, important if your network has e.g. dropout or batchnorm layers
     model.train()
 
     # TODO Implement the training loop. It looks very much the same as in the previous exercise part, except that you are now using points instead of voxel grids
+    best_accuracy = 0.
+    train_loss_running = 0.
+
+    for epoch in range(config['max_epochs']):
+
+        train_loss_running = 0.
+        for i, batch in enumerate(trainloader):
+            #ShapeNetPoints.move_batch_to_device(batch, device) # Move data on gpu if available
+            input_data, target_labels = batch['points'].float().to(device), batch['label'].type(torch.LongTensor).to(device)
+
+            optimizer.zero_grad()
+            prediction = model(input_data)
+
+            loss = loss_criterion(prediction, target_labels)
+
+            #TODO Compute loss total? -> 3dcnn always computes total loss?
+
+            loss.backward()
+            optimizer.step()
+
+            # loss logging
+            train_loss_running += loss.item()
+
+            iteration = epoch * len(trainloader) + i
+
+            if iteration % config['print_every_n'] == (config['print_every_n'] - 1):
+                print(f'[{epoch:03d}/{i:05d}] train_loss: {train_loss_running / config["print_every_n"]:.3f}')
+                train_loss_running = 0.
+
+            # validation
+            if iteration % config['validate_every_n'] == (config['validate_every_n'] - 1):
+                model.eval()
+
+                loss_val = 0
+                total, correct = 0, 0
+
+                for batch_val in valloader:
+                    #ShapeNetPoints.move_batch_to_device(batch_val, device) # Move data on gpu if available
+                    input_data, target_labels = batch['points'].float().to(device), batch['label'].type(torch.LongTensor).to(device)
+
+                    with torch.no_grad():
+                        prediction = model(input_data)
+
+                    _, predicted_labels = torch.max(prediction, dim=1)
+
+                    total += predicted_labels.shape[0]
+                    correct += (predicted_labels == target_labels).sum().item()
+                    loss_val += loss_criterion(prediction, target_labels).item()
+                
+                accuracy = 100 * correct / total
+                print(f'[{epoch:03d}/{i:05d}] val_loss: {loss_val / len(valloader):.3f}, val_accuracy: {accuracy:.3f}%')
+
+                if accuracy > best_accuracy:
+                    torch.save(model.state_dict(), f'exercise_2/runs/{config["experiment_name"]}/model_best.ckpt')
+                    best_accuracy = accuracy
+                
+                model.train()
+
 
 
 def main(config):
