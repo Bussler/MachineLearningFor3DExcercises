@@ -154,5 +154,6 @@ E2/exercise_2/toy_data.ply
 E2/exercise_2/test.py
 E2/exercise_2/exercise_2/data/ShapeNetPointClouds
 E2/exercise_2/exercise_2/data/ShapeNetVox32
+E2/exercise_2/exercise_2/data/shapenetcore_partanno_segmentation_benchmark_v0
 E1/E1/test.py
 E2/exercise_2/exercise_2/data/ShapeNetVox32.tar
