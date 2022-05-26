@@ -8,11 +8,11 @@ from exercise_2.model.pointnet import PointNetSegmentation
 
 def train(model, trainloader, valloader, device, config):
 
-    # TODO Declare loss and move to specified device
-    loss_criterion = None
+    # T Declare loss and move to specified device
+    loss_criterion = torch.nn.CrossEntropyLoss().to(device) # TODO Loss criterion wrong?
 
-    # TODO Declare optimizer
-    optimizer = None
+    # T Declare optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
 
     # set model to train, important if your network has e.g. dropout or batchnorm layers
     model.train()
@@ -25,7 +25,23 @@ def train(model, trainloader, valloader, device, config):
 
     for epoch in range(config['max_epochs']):
         for i, batch in enumerate(trainloader):
-            # TODO Add missing pieces, as in the exercise parts before
+            # T Add missing pieces, as in the exercise parts before
+
+            input_data, target_labels = batch['points'].float().to(device), batch['segmentation_labels'].type(torch.LongTensor).to(device)
+            #ShapeNetParts.move_batch_to_device(batch, device)
+
+            optimizer.zero_grad()
+            prediction = model(input_data)
+
+            loss = loss_criterion(prediction, target_labels) # TODO error here
+
+            loss.backward()
+            optimizer.step()
+
+            # loss logging
+            train_loss_running += loss.item()
+
+            iteration = epoch * len(trainloader) + i
 
             if iteration % config['print_every_n'] == (config['print_every_n'] - 1):
                 print(f'[{epoch:03d}/{i:05d}] train_loss: {train_loss_running / config["print_every_n"]:.3f}')
@@ -33,8 +49,9 @@ def train(model, trainloader, valloader, device, config):
 
             # validation evaluation and logging
             if iteration % config['validate_every_n'] == (config['validate_every_n'] - 1):
-                # TODO Add missing pieces, as in the exercise parts before
-
+                # T Add missing pieces, as in the exercise parts before
+                model.eval()
+                
                 total, correct = 0, 0
                 ious = []
 
@@ -42,6 +59,13 @@ def train(model, trainloader, valloader, device, config):
                 loss_val = 0.
                 for batch_val in valloader:
                     # TODO Add missing pieces, as in the exercise parts before
+                    input_data, target_labels = batch_val['points'].float().to(device), batch_val['segmentation_labels'].type(torch.LongTensor).to(device)
+                    #ShapeNetParts.move_batch_to_device(batch_val, device)
+
+                    with torch.no_grad():
+                        prediction = model(input_data)
+
+                    _, predicted_label = torch.max(prediction, dim=1)
 
                     total += predicted_label.numel()
                     correct += (predicted_label == batch_val['segmentation_labels']).sum().item()
@@ -68,6 +92,7 @@ def train(model, trainloader, valloader, device, config):
                     best_accuracy = accuracy
 
                 # TODO Add missing pieces, as in the exercise parts before
+                model.train()
 
 
 def main(config):
@@ -100,8 +125,8 @@ def main(config):
         train_dataset,   # Datasets return data one sample at a time; Dataloaders use them and aggregate samples into batches
         batch_size=config['batch_size'],   # The size of batches is defined here
         shuffle=True,    # Shuffling the order of samples is useful during training to prevent that the network learns to depend on the order of the input data
-        num_workers=4,   # Data is usually loaded in parallel by num_workers
-        pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
+        #num_workers=4,   # Data is usually loaded in parallel by num_workers
+        #pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
     )
 
     val_dataset = ShapeNetParts('val' if not config['is_overfit'] else 'overfit')
@@ -109,8 +134,8 @@ def main(config):
         val_dataset,     # Datasets return data one sample at a time; Dataloaders use them and aggregate samples into batches
         batch_size=config['batch_size'],   # The size of batches is defined here
         shuffle=False,   # During validation, shuffling is not necessary anymore
-        num_workers=4,   # Data is usually loaded in parallel by num_workers
-        pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
+        #num_workers=4,   # Data is usually loaded in parallel by num_workers
+        #pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
     )
 
     # Instantiate model
@@ -121,7 +146,7 @@ def main(config):
         model.load_state_dict(torch.load(config['resume_ckpt'], map_location='cpu'))
 
     # Move model to specified device
-    model.to(device)
+    model = model.to(device)
 
     # Create folder for saving checkpoints
     Path(f'exercise_2/runs/{config["experiment_name"]}').mkdir(exist_ok=True, parents=True)
