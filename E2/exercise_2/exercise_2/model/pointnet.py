@@ -131,7 +131,7 @@ class PointNetClassification(nn.Module):
         # T Pass output of encoder through your layers
         x = F.relu(self.bn1(self.fc1(x)))
         x = F.relu(self.bn2(self.dropout(self.fc2(x)))) # second layer, dropout before batch norm
-        x = self.fc3(x)
+        x = self.fc3(x) # BigM: put LogSoftMax on top?
 
         return x
 

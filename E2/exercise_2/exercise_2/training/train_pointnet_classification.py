@@ -56,7 +56,7 @@ def train(model, trainloader, valloader, device, config):
 
                 for batch_val in valloader:
                     #ShapeNetPoints.move_batch_to_device(batch_val, device) # Move data on gpu if available
-                    input_data, target_labels = batch['points'].float().to(device), batch['label'].type(torch.LongTensor).to(device)
+                    input_data, target_labels = batch_val['points'].float().to(device), batch_val['label'].type(torch.LongTensor).to(device)
 
                     with torch.no_grad():
                         prediction = model(input_data)
@@ -108,8 +108,8 @@ def main(config):
         train_dataset,   # Datasets return data one sample at a time; Dataloaders use them and aggregate samples into batches
         batch_size=config['batch_size'],   # The size of batches is defined here
         shuffle=True,    # Shuffling the order of samples is useful during training to prevent that the network learns to depend on the order of the input data
-        num_workers=4,   # Data is usually loaded in parallel by num_workers
-        pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
+        #num_workers=4,   # Data is usually loaded in parallel by num_workers
+        #pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
     )
 
     val_dataset = ShapeNetPoints('val' if not config['is_overfit'] else 'overfit')
@@ -117,8 +117,8 @@ def main(config):
         val_dataset,     # Datasets return data one sample at a time; Dataloaders use them and aggregate samples into batches
         batch_size=config['batch_size'],   # The size of batches is defined here
         shuffle=False,   # During validation, shuffling is not necessary anymore
-        num_workers=4,   # Data is usually loaded in parallel by num_workers
-        pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
+        #num_workers=4,   # Data is usually loaded in parallel by num_workers
+        #pin_memory=True  # This is an implementation detail to speed up data uploading to the GPU
     )
 
     # Instantiate model
