@@ -9,7 +9,7 @@ from exercise_2.model.pointnet import PointNetSegmentation
 def train(model, trainloader, valloader, device, config):
 
     # T Declare loss and move to specified device
-    loss_criterion = torch.nn.CrossEntropyLoss().to(device) # TODO Loss criterion wrong?
+    loss_criterion = torch.nn.CrossEntropyLoss().to(device)
 
     # T Declare optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
@@ -28,12 +28,12 @@ def train(model, trainloader, valloader, device, config):
             # T Add missing pieces, as in the exercise parts before
 
             input_data, target_labels = batch['points'].float().to(device), batch['segmentation_labels'].type(torch.LongTensor).to(device)
-            #ShapeNetParts.move_batch_to_device(batch, device)
+            ShapeNetParts.move_batch_to_device(batch, device)
 
             optimizer.zero_grad()
             prediction = model(input_data)
 
-            loss = loss_criterion(prediction, target_labels) # TODO error here
+            loss = loss_criterion(prediction.transpose(2, 1), target_labels)
 
             loss.backward()
             optimizer.step()
@@ -60,12 +60,12 @@ def train(model, trainloader, valloader, device, config):
                 for batch_val in valloader:
                     # TODO Add missing pieces, as in the exercise parts before
                     input_data, target_labels = batch_val['points'].float().to(device), batch_val['segmentation_labels'].type(torch.LongTensor).to(device)
-                    #ShapeNetParts.move_batch_to_device(batch_val, device)
+                    ShapeNetParts.move_batch_to_device(batch_val, device)
 
                     with torch.no_grad():
                         prediction = model(input_data)
 
-                    _, predicted_label = torch.max(prediction, dim=1)
+                    _, predicted_label = torch.max(prediction.transpose(2, 1), dim=1)
 
                     total += predicted_label.numel()
                     correct += (predicted_label == batch_val['segmentation_labels']).sum().item()
@@ -81,7 +81,7 @@ def train(model, trainloader, valloader, device, config):
                         part_ious.append(iou)
                     ious.append(torch.mean(torch.stack([torch.tensor(elem, device=device) if type(elem) == int else elem for elem in part_ious])))
 
-                    loss_val += loss_criterion(prediction.transpose(2, 1), batch_val['segmentation_labels']).item()
+                    loss_val += loss_criterion(prediction.transpose(2, 1), target_labels).item()
 
                 accuracy = 100 * correct / total
                 iou = torch.mean(torch.stack(ious)).item()
