@@ -57,25 +57,29 @@ class ShapeNetParts(torch.utils.data.Dataset):
         pointDataName = shape_id+".pts"
         labelDataName = shape_id+".seg"
 
-        # generate array of size 1024
-        points = np.empty((3,1024), dtype=float)
-        labels = np.empty(1024, dtype=float)
-
         fP=open(ShapeNetParts.dataset_path / category_id / 'points' / pointDataName, 'r')
         linesP=fP.readlines()
 
         fL=open(ShapeNetParts.dataset_path / category_id / 'points_label' / labelDataName, 'r')
         linesL=fL.readlines()
 
+        amtPoints = ShapeNetParts.num_points
+        #if amtPoints > len(linesP):
+        #    amtPoints = len(linesP)
+
+        # generate array of size 1024
+        points = np.empty((3,amtPoints), dtype=float)
+        labels = np.empty(amtPoints, dtype=float)
+
         # generate 1024 random choices of points to read from all points in input file
-        randomLines = np.random.choice(len(linesP), 1024, replace=False)
+        randomLines = np.random.choice(len(linesP), amtPoints, replace=True)
         for i in range(0, len(randomLines)):
-            parsedLine = linesP[i].split()
+            parsedLine = linesP[randomLines[i]].split()
             points[0][i] = float(parsedLine[0])
             points[1][i] = float(parsedLine[1])
             points[2][i] = float(parsedLine[2])
 
-            localLabel = [linesL[i].split()[0]]
+            localLabel = [linesL[randomLines[i]].split()[0]]
             labels[i] = ShapeNetParts.part_id_to_overall_id[category_id+'_'+localLabel[0]]
 
         return points, labels
