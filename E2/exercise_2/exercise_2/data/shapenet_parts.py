@@ -72,7 +72,7 @@ class ShapeNetParts(torch.utils.data.Dataset):
         labels = np.empty(amtPoints, dtype=float)
 
         # generate 1024 random choices of points to read from all points in input file
-        randomLines = np.random.choice(len(linesP), amtPoints, replace=True)
+        randomLines = np.random.choice(len(linesP), amtPoints, replace=True) # TODO replace has to be true, if otherwise not enough points there, or make 2 lists for that case?
         for i in range(0, len(randomLines)):
             parsedLine = linesP[randomLines[i]].split()
             points[0][i] = float(parsedLine[0])
