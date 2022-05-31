@@ -26,8 +26,10 @@ class InferenceHandler3DCNN:
         input_tensor = torch.from_numpy(voxels).float().unsqueeze(0).unsqueeze(0)
 
         # TODO: Predict class
-        prediction = None
-        class_id = None
-        class_name = None
+        prediction = self.model(input_tensor).sum(dim=1)
+        _, predicted_label = torch.max(prediction, dim=1)
+
+        class_id = ShapeNetVox.classes[predicted_label]
+        class_name = ShapeNetVox.class_name_mapping[class_id]
 
         return class_name

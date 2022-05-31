@@ -121,11 +121,11 @@ def train(model, trainloader, valloader, device, config):
                         # TODO: Get prediction scores
                         prediction = model(batch_val['voxel'])
 
-                    pred_total = torch.zeros((config['batch_size'], 13), dtype=batch['voxel'].dtype, requires_grad=True).to(device)
+                    pred_total = torch.zeros((batch_val['voxel'].shape[0], 13), dtype=batch['voxel'].dtype, requires_grad=True).to(device)
                     loss_total_val = torch.zeros([1], dtype=batch['voxel'].dtype, requires_grad=True).to(device)
                     for output_idx in range(prediction.shape[1]):
                         pred_total = pred_total + prediction[:, output_idx, :]
-                        loss_total_val += loss_total_val + loss_criterion(prediction[:, output_idx, :], batch['label'])
+                        loss_total_val = loss_total_val + loss_criterion(prediction[:, output_idx, :], batch_val['label'])
                     # TODO: Get predicted labels from scores
 
 
