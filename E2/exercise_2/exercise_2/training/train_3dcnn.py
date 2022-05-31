@@ -34,10 +34,10 @@ def main(config):
 
     # create dataloaders
     trainset = ShapeNetVox('train' if not config['is_overfit'] else 'overfit')
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=config['batch_size'], shuffle=True)#, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=config['batch_size'], shuffle=True, num_workers=2)
 
     valset = ShapeNetVox('val' if not config['is_overfit'] else 'overfit')
-    valloader = torch.utils.data.DataLoader(valset, batch_size=config['batch_size'], shuffle=False)#, num_workers=2)
+    valloader = torch.utils.data.DataLoader(valset, batch_size=config['batch_size'], shuffle=False, num_workers=2)
 
     # instantiate model
     model = ThreeDeeCNN(ShapeNetVox.num_classes)
