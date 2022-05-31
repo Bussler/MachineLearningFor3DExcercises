@@ -34,10 +34,10 @@ def main(config):
 
     # create dataloaders
     trainset = ShapeNetVox('train' if not config['is_overfit'] else 'overfit')
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=config['batch_size'], shuffle=True, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=config['batch_size'], shuffle=True)#, num_workers=2)
 
     valset = ShapeNetVox('val' if not config['is_overfit'] else 'overfit')
-    valloader = torch.utils.data.DataLoader(valset, batch_size=config['batch_size'], shuffle=False, num_workers=2)
+    valloader = torch.utils.data.DataLoader(valset, batch_size=config['batch_size'], shuffle=False)#, num_workers=2)
 
     # instantiate model
     model = ThreeDeeCNN(ShapeNetVox.num_classes)
@@ -121,29 +121,34 @@ def train(model, trainloader, valloader, device, config):
                         # TODO: Get prediction scores
                         prediction = model(batch_val['voxel'])
 
-                    print(prediction)
-                    pred_total = torch.zeros([1], dtype=batch['voxel'].dtype, requires_grad=True).to(device)
+                    pred_total = torch.zeros((config['batch_size'], 13), dtype=batch['voxel'].dtype, requires_grad=True).to(device)
                     loss_total_val = torch.zeros([1], dtype=batch['voxel'].dtype, requires_grad=True).to(device)
                     for output_idx in range(prediction.shape[1]):
-                        pred_total = pred_total + prediction[:, output_idx, :], batch['label']
+                        pred_total = pred_total + prediction[:, output_idx, :]
                         loss_total_val += loss_total_val + loss_criterion(prediction[:, output_idx, :], batch['label'])
                     # TODO: Get predicted labels from scores
 
 
-                    _, predicted_label = torch.max(prediction, dim=1)
+                    _, predicted_label = torch.max(pred_total, dim=1)
 
 
                     # TODO: keep track of total / correct / loss_total_val
                     total += predicted_label.shape[0]
                     
-                    print(predicted_label.shape)
-                    correct += (predicted_label == batch['label']).sum().item()
+                    correct += (predicted_label == batch_val['label']).sum().item()
 
-                    loss_total_val += loss_criterion(prediction, batch['label']).item()
+                    #predicted_labels = torch.sum(prediction, dim=1)
+
+                    #total += predicted_labels.shape[0]
+
+                    #predicted_label = torch.max(predicted_labels, dim=1)
+                    #correct += (predicted_label == batch_val['label']).sum().item()
+                    #loss_total_val += loss_criterion(predicted_labels, batch_val["label"]).item()
+
 
                 accuracy = 100 * correct / total
 
-                print(f'[{epoch:03d}/{i:05d}] val_loss: {loss_total_val / len(valloader):.3f}, val_accuracy: {accuracy:.3f}%')
+                print(f'[{epoch:03d}/{i:05d}] val_loss: {loss_total_val.item() / len(valloader):.3f}, val_accuracy: {accuracy:.3f}%')
 
                 if accuracy > best_accuracy:
                     torch.save(model.state_dict(), f'exercise_2/runs/{config["experiment_name"]}/model_best.ckpt')
