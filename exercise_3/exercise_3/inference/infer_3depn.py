@@ -22,11 +22,27 @@ class InferenceHandler3DEPN:
         :param target_df: Target grid with complete DF of shape 32x32x32
         :return: Tuple with mesh representations of input, reconstruction, and target
         """
-        # TODO Apply truncation distance: SDF values should lie within -3 and 3, DF values between 0 and 3
+        # T Apply truncation distance: SDF values should lie within -3 and 3, DF values between 0 and 3
+
+        input_sdf = np.where(input_sdf < -3, -3, input_sdf)
+        input_sdf = np.where(input_sdf > 3, 3, input_sdf)
+
+        target_df = np.where(target_df < 0, 0, target_df)
+        target_df = np.where(target_df > 3, 3, target_df)
+
+        signs = np.sign(input_sdf)
+        helperArray = np.empty((2,input_sdf.shape[0], input_sdf.shape[1], input_sdf.shape[2]), dtype= float)
+
+        helperArray[0] = input_sdf
+        helperArray[1] = signs
+        helperArray = np.expand_dims(helperArray, axis=0)
 
         with torch.no_grad():
             reconstructed_df = None
-            # TODO: Pass input in the right format though the network and revert the log scaling by applying exp and subtracting 1
+            # T Pass input in the right format though the network and revert the log scaling by applying exp and subtracting 1
+            input  = torch.from_numpy(helperArray).float()
+            reconstructed_df = self.model(input)
+            reconstructed_df = torch.exp(reconstructed_df) - 1
 
         input_sdf = np.abs(input_sdf)
         input_mesh = marching_cubes(input_sdf, level=1)
