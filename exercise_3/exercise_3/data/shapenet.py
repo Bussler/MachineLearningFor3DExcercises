@@ -26,22 +26,23 @@ class ShapeNet(torch.utils.data.Dataset):
         input_sdf = ShapeNet.get_shape_sdf(sdf_id)
         target_df = ShapeNet.get_shape_df(df_id)
 
-        # TODO Apply truncation to sdf and df
+        # T Apply truncation to sdf and df
         input_sdf = np.where(input_sdf < -3, -3, input_sdf) # M TODO better way to do this?
         input_sdf = np.where(input_sdf > 3, 3, input_sdf)
 
         target_df = np.where(target_df < -3, -3, target_df)
         target_df = np.where(target_df > 3, 3, target_df)
 
-        # TODO Stack (distances, sdf sign) for the input sdf
+        # T Stack (distances, sdf sign) for the input sdf
         signs = np.sign(input_sdf)
         helperArray = np.empty((2,input_sdf.shape[0], input_sdf.shape[1], input_sdf.shape[2]), dtype= float)
+
         helperArray[0] = input_sdf
         helperArray[1] = signs
 
         input_sdf = helperArray
 
-        # TODO Log-scale target df M TODO also scale prediction?
+        # T Log-scale target df M TODO also scale prediction?
         target_df = np.log(target_df+1)
 
         return {
@@ -55,16 +56,20 @@ class ShapeNet(torch.utils.data.Dataset):
 
     @staticmethod
     def move_batch_to_device(batch, device):
-        # TODO add code to move batch to device
-        pass
+        batch['name'] = batch['name'].to(device)
+        batch['input_sdf'] = batch['input_sdf'].to(device)
+        batch['target_df'] = batch['target_df'].to(device)
 
     @staticmethod
     def get_shape_sdf(shapenet_id):
         sdf = None
-        # TODO implement sdf data loading
+        # T implement sdf data loading
         
         category, fileName = shapenet_id.split('/')
         fileName = fileName + '.sdf'
+
+        #category = '02691156'
+        #fileName = '1a04e3eab45ca15dd86060f189eb133__0__.sdf'
 
         f = open(ShapeNet.dataset_sdf_path / category / fileName, "r")
 
@@ -81,7 +86,7 @@ class ShapeNet(torch.utils.data.Dataset):
     @staticmethod
     def get_shape_df(shapenet_id):
         df = None
-        # TODO implement df data loading
+        # T implement df data loading
 
         category, fileName = shapenet_id.split('/')
         fileName = fileName + '.df'

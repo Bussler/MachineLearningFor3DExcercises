@@ -156,4 +156,6 @@ E2/exercise_2/exercise_2/data/ShapeNetPointClouds
 E2/exercise_2/exercise_2/data/ShapeNetVox32
 E2/exercise_2/exercise_2/data/shapenetcore_partanno_segmentation_benchmark_v0
 E1/E1/test.py
-E2/exercise_2/exercise_2/data/ShapeNetVox32.tar
+exercise_3/exercise_3/data/shapenet_dim32_sdf
+exercise_3/exercise_3/data/shapenet_dim32_df
+exercise_3/exercise_3/data/sdf_sofas

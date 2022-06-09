@@ -42,7 +42,7 @@ class ShapeImplicit(torch.utils.data.Dataset):
         sdf_samples_path = ShapeImplicit.dataset_path / item / "sdf.npz"
 
         # read points and their sdf values from disk
-        # TODO: Implement the method get_sdf_samples
+        # T: Implement the method get_sdf_samples
         sdf_samples = self.get_sdf_samples(sdf_samples_path)
 
         points = sdf_samples[:, :3]
@@ -62,8 +62,7 @@ class ShapeImplicit(torch.utils.data.Dataset):
         """
         :return: length of the dataset
         """
-        # TODO: Implement
-        return
+        return len(self.items)
 
     @staticmethod
     def move_batch_to_device(batch, device):
@@ -85,11 +84,17 @@ class ShapeImplicit(torch.utils.data.Dataset):
         pos_tensor = remove_nans(torch.from_numpy(npz["pos"]))
         neg_tensor = remove_nans(torch.from_numpy(npz["neg"]))
 
-        # TODO: Implement such that you return a pytorch float32 torch tensor of shape (self.num_sample_points, 4)
+        # T: Implement such that you return a pytorch float32 torch tensor of shape (self.num_sample_points, 4)
         # the returned tensor shoud have approximately self.num_sample_points/2 randomly selected samples from pos_tensor
         # and approximately self.num_sample_points/2 randomly selected samples from neg_tensor
 
-        return
+        outputTesnor = torch.empty((self.num_sample_points, 4), dtype= torch.float32)
+
+        # M TODO do we have to watch out that the npz has less than num_sample_points/2 data points; do we have to explicitly counteract the possibility to get the same index twice?
+        posRandIndices = np.random.randint(pos_tensor.shape[0], size=int(self.num_sample_points/2))
+        negRandIndices = np.random.randint(neg_tensor.shape[0], size=int(self.num_sample_points/2))
+
+        return torch.cat((pos_tensor[posRandIndices, :], neg_tensor[negRandIndices, :]))
 
     @staticmethod
     def get_mesh(shape_id):
