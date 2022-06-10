@@ -11,7 +11,7 @@ def train(model, latent_vectors, train_dataloader, device, config):
 
     # Declare loss and move to device
     # T: declare loss as `loss_criterion`
-    loss_criterion = torch.nn.L1Loss(reduction="sum") # M TODO other ideas? CrossEntropy?
+    loss_criterion = torch.nn.L1Loss(reduction="sum") # M TODO other ideas? I think in the paper they also use the L1
     loss_criterion.to(device)
 
     # declare optimizer
@@ -23,7 +23,7 @@ def train(model, latent_vectors, train_dataloader, device, config):
         },
         {
             # T: optimizer params and learning rate for latent code (lr provided in config)
-            'params': latent_vectors.parameters(), # M TODO params of latent vectors?
+            'params': latent_vectors.parameters(),
             'lr': config['learning_rate_code'],
         }
     ])
@@ -69,7 +69,7 @@ def train(model, latent_vectors, train_dataloader, device, config):
             predicted_sdf = torch.clamp(predicted_sdf, -0.1, 0.1)
 
             # compute loss
-            loss = loss_criterion(predicted_sdf, sdf)
+            loss = loss_criterion(predicted_sdf, sdf) / num_points_per_batch # M: In the paper they sum over all the L1 losses, so we have to divide here to get out correct loss
 
             # regularize latent codes
             code_regularization = torch.mean(torch.norm(batch_latent_vectors, dim=1)) * config['lambda_code_regularization']
