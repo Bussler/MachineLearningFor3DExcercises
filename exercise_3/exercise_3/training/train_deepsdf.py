@@ -62,7 +62,7 @@ def train(model, latent_vectors, train_dataloader, device, config):
             sdf = batch['sdf'].reshape((num_points_per_batch, 1))
 
             # T: perform forward pass
-            points = torch.cat((points, batch_latent_vectors), dim=1)
+            points = torch.cat((batch_latent_vectors, points), dim=1)
 
             predicted_sdf = model(points)
             # T: truncate predicted sdf between -0.1 and 0.1
