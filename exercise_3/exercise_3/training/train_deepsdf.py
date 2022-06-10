@@ -10,17 +10,21 @@ from exercise_3.util.misc import evaluate_model_on_grid
 def train(model, latent_vectors, train_dataloader, device, config):
 
     # Declare loss and move to device
-    # TODO: declare loss as `loss_criterion`
-    # loss_criterion =
+    # T: declare loss as `loss_criterion`
+    loss_criterion = torch.nn.L1Loss(reduction="sum") # M TODO other ideas? CrossEntropy?
     loss_criterion.to(device)
 
     # declare optimizer
     optimizer = torch.optim.Adam([
         {
-            # TODO: optimizer params and learning rate for model (lr provided in config)
+            # T: optimizer params and learning rate for model (lr provided in config)
+            'params': model.parameters(),
+            'lr': config['learning_rate_model'],
         },
         {
-            # TODO: optimizer params and learning rate for latent code (lr provided in config)
+            # T: optimizer params and learning rate for latent code (lr provided in config)
+            'params': latent_vectors.parameters(), # M TODO params of latent vectors?
+            'lr': config['learning_rate_code'],
         }
     ])
 
@@ -42,7 +46,8 @@ def train(model, latent_vectors, train_dataloader, device, config):
             # Move batch to device
             ShapeImplicit.move_batch_to_device(batch, device)
 
-            # TODO: Zero out previously accumulated gradients
+            # T: Zero out previously accumulated gradients
+            optimizer.zero_grad()
 
             # calculate number of samples per batch (= number of shapes in batch * number of points per shape)
             num_points_per_batch = batch['points'].shape[0] * batch['points'].shape[1]
@@ -56,10 +61,12 @@ def train(model, latent_vectors, train_dataloader, device, config):
             points = batch['points'].reshape((num_points_per_batch, 3))
             sdf = batch['sdf'].reshape((num_points_per_batch, 1))
 
-            # TODO: perform forward pass
-            # predicted_sdf =
-            # TODO: truncate predicted sdf between -0.1 and 0.1
-            # predicted_sdf =
+            # T: perform forward pass
+            points = torch.cat((points, batch_latent_vectors), dim=1)
+
+            predicted_sdf = model(points)
+            # T: truncate predicted sdf between -0.1 and 0.1
+            predicted_sdf = torch.clamp(predicted_sdf, -0.1, 0.1)
 
             # compute loss
             loss = loss_criterion(predicted_sdf, sdf)
@@ -69,9 +76,11 @@ def train(model, latent_vectors, train_dataloader, device, config):
             if epoch > 100:
                 loss = loss + code_regularization
 
-            # TODO: backward
+            # T: backward
+            loss.backward()
 
-            # TODO: update network parameters
+            # T: update network parameters
+            optimizer.step()
 
             # loss logging
             train_loss_running += loss.item()
