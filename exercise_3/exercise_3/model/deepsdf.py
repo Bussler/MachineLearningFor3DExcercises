@@ -5,6 +5,8 @@ import torch
 # M: Class to define the nws of the sequence of weight_norm networks
 class WeightNormNW(nn.Module):
     def __init__(self, inDim, outDim, dropout_prob):
+        super().__init__()
+
         self.Network = nn.Sequential(
             nn.utils.weight_norm(nn.Linear(inDim, outDim)), #M TODO add batch norm layer here?
             nn.ReLU(),
@@ -42,5 +44,19 @@ class DeepSDFDecoder(nn.Module):
         :param x_in: B x (latent_size + 3) tensor
         :return: B x 1 tensor
         """
-        # TODO: implement forward pass
+        
+        x = self.WNW1(x_in)
+        x = self.WNW2(x)
+        x = self.WNW3(x)
+        x = self.WNW4(x)
+
+        x = torch.cat((x, x_in), dim=1)
+
+        x = self.WNW5(x)
+        x = self.WNW6(x)
+        x = self.WNW7(x)
+        x = self.WNW8(x)
+
+        x = self.ll(x)
+
         return x
