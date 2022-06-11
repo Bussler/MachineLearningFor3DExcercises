@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from pathlib import Path
 
 import torch
@@ -51,21 +52,22 @@ class InferenceHandlerDeepSDF:
 
         model = self.get_model()
 
-        # TODO: define loss criterion for optimization
-        # loss_l1 =
+        # T: define loss criterion for optimization
+        loss_l1 = torch.nn.L1Loss()
 
         # initialize the latent vector that will be optimized
         latent = torch.ones(1, self.latent_code_length).normal_(mean=0, std=0.01).to(self.device)
         latent.requires_grad = True
 
-        # TODO: create optimizer on latent, use a learning rate of 0.005
-        # optimizer =
+        # T: create optimizer on latent, use a learning rate of 0.005
+        optimizer = torch.optim.Adam([latent], lr=0.005)
 
         for iter_idx in range(num_optimization_iters):
-            # TODO: zero out gradients
+            # T: zero out gradients
+            optimizer.zero_grad()
 
-            # TODO: sample a random batch from the observations, batch size = self.num_samples
-            # batch_indices =
+            # T: sample a random batch from the observations, batch size = self.num_samples
+            batch_indices = np.random.randint(points.shape[0], size=self.num_samples)
 
             batch_points = points[batch_indices, :]
             batch_sdf = sdf[batch_indices, :]
@@ -77,11 +79,12 @@ class InferenceHandlerDeepSDF:
             # same latent code is used per point, therefore expand it to have same length as batch points
             latent_codes = latent.expand(self.num_samples, -1)
 
-            # TODO: forward pass with latent_codes and batch_points
-            # predicted_sdf =
+            # T: forward pass with latent_codes and batch_points
+            batch_points = torch.cat((latent_codes, batch_points), dim=1)
+            predicted_sdf = model(batch_points)
 
-            # TODO: truncate predicted sdf between -0.1, 0.1
-            # predicted_sdf =
+            # T: truncate predicted sdf between -0.1, 0.1
+            predicted_sdf = torch.clamp(predicted_sdf, -0.1, 0.1)
 
             # compute loss wrt to observed sdf
             loss = loss_l1(predicted_sdf, batch_sdf)
@@ -89,7 +92,10 @@ class InferenceHandlerDeepSDF:
             # regularize latent code
             loss += 1e-4 * torch.mean(latent.pow(2))
 
-            # TODO: backwards and step
+            # T: backwards and step
+            loss.backward()
+
+            optimizer.step()
 
             # loss logging
             if iter_idx % 50 == 0:
