@@ -129,7 +129,9 @@ class InferenceHandlerDeepSDF:
 
         for i in range(0, num_interpolation_steps + 1):
             # TODO: interpolate the latent codes: latent_codes[0, :] and latent_codes[1, :]
-            # interpolated_code =
+            #interpolated_code = torch.lerp(latent_codes[0, :], latent_codes[1, :], 0.5)
+            stepSize = 1 / num_interpolation_steps 
+            interpolated_code = torch.lerp(latent_codes[0, :], latent_codes[1, :], stepSize*i)
             # reconstruct the shape at the interpolated latent code
             evaluate_model_on_grid(model, interpolated_code, self.device, 64, self.experiment / "interpolation" / f"{i:05d}_000.obj")
 
